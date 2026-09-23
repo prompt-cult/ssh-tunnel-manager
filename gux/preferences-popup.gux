@@ -1,0 +1,109 @@
+import 'gux:core';
+import 'gux:tw';
+import 'gux:controls';
+
+/// SSH Tunnel Manager — settings window with the Preferences
+/// popover open, anchored above the sidebar footer button.
+Page('preferences-popup',
+  viewport: Viewport(1280, 921),
+  style: Style(bg: tw.white, text: '#1d1d1f', theme: 'light'),
+
+  /// The underlying window content is the same as settings-window.gux.
+  /// Only the sidebar footer state and the popover differ; see
+  /// settings-window.gux for the full detail-pane contract.
+
+  /// ── SIDEBAR (summarised — identical contract to settings-window.gux) ──
+  Zone('sidebar',
+    bounds: Bounds(180, 50, 500, 840),
+    style: Style(bg: '#f2f2f4', borderRight: '1px solid #e0e0e2'),
+    children: [
+      TunnelList(items: Dynamic('tunnels'),
+        selected: 'New Tunnel',
+        selectedStyle: Style(bg: '#2563eb', text: tw.white, rounded: 'lg'),
+        child: TunnelListItem(name: Dynamic('name'),
+          ports: Dynamic('ports'),
+          dot: StatusDot(colour: '#3a3a3c', size: 8))),
+
+      /// Footer: Preferences (popover anchor) + version.
+      /// Trash icon sits at the right edge just above the footer here.
+      Zone('sidebar-footer',
+        bounds: Bounds(180, 790, 500, 840),
+        style: Style(bg: '#f2f2f4', px: 16, py: 8),
+        children: [
+          Row(justify: 'space-between', children: [
+            LinkButton(label: 'Preferences', icon: 'gear',
+              style: Style(text: '#1d1d1f', size: '12px')),
+            Label('v1.10.0',
+              style: Style(size: '12px', colour: '#8e8e93')),
+          ]),
+        ],
+      ),
+    ],
+  ),
+
+  /// ── PREFERENCES POPOVER ─────────────────────────────────
+  /// Anchored above the Preferences footer button, tail pointing down.
+  /// Light grey translucent macOS popover; NOT white.
+  Zone('preferences-popover',
+    bounds: Bounds(45, 555, 435, 775),
+    style: Style(bg: '#ececed !important', rounded: '2xl',
+      shadow: 'lg', border: '1px solid #d6d6d8', p: 16),
+    children: [
+      Label('Preferences',
+        style: Style(font: 'bold', size: '15px', pb: 8)),
+
+      /// Group 1: login item.
+      CheckboxRow(label: 'Launch at Login', checked: true,
+        checkbox: Checkbox(state: 'checked', onColour: '#2563eb',
+          tick: tw.white, size: 18),
+        style: Style(size: '14px', h: 44)),
+
+      /// Divider between groups.
+      Divider(style: Style(bg: '#c9c9cc', h: 1)),
+
+      /// Group 2: connect/disconnect feedback.
+      CheckboxRow(label: 'Play a sound on connect / disconnect',
+        checked: true,
+        checkbox: Checkbox(state: 'checked', onColour: '#2563eb',
+          tick: tw.white, size: 18),
+        style: Style(size: '14px', h: 44)),
+
+      CheckboxRow(label: 'Show a notification on\nconnect / disconnect',
+        checked: true,
+        checkbox: Checkbox(state: 'checked', onColour: '#2563eb',
+          tick: tw.white, size: 18),
+        style: Style(size: '14px', h: 56)),
+    ],
+  ),
+
+  /// ── DETAIL PANE (structural presence only) ──────────────
+  /// Full colour contract lives in settings-window.gux.
+  Zone('detail',
+    bounds: Bounds(500, 50, 1205, 840),
+    style: Style(bg: tw.white),
+    assert: Assert(non_blank: true),
+    children: [
+      Zone('header', assert: Assert(non_blank: true), children: [
+        Label('SSH Tunnel Manager'),
+        Button(label: 'Save'),
+      ]),
+      Zone('status-card', assert: Assert(non_blank: true), children: [
+        StatusLabel(text: 'Disconnected'),
+        Button(label: 'Connect',
+          style: Style(bg: '#33c558 !important', text: tw.white)),
+      ]),
+      Zone('ssh-command-card', assert: Assert(non_blank: true), children: [
+        CodeBlock(text: Dynamic('ssh-command'), font: 'mono'),
+      ]),
+      Label('General'),
+      FormRow(label: 'Name', child: TextInput(value: 'New Tunnel')),
+      Label('SSH Connection'),
+      FormRow(label: 'Mode', child: SegmentedControl(
+        segments: ['Host', 'SSH Alias'], selected: 0)),
+      FormRow(label: 'Host',
+        child: TextInput(value: 'user@example.com')),
+      FormRow(label: 'Identity File (optional)',
+        child: TextInput(value: '')),
+    ],
+  ),
+)

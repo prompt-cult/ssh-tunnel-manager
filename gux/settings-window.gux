@@ -1,0 +1,193 @@
+import 'gux:core';
+import 'gux:tw';
+import 'gux:controls';
+
+/// SSH Tunnel Manager — main settings window, light theme.
+/// Left sidebar with tunnel list and list tools, right pane with
+/// status card, generated SSH command, and connection form.
+Page('settings-window',
+  viewport: Viewport(1280, 975),
+  style: Style(bg: tw.white, text: '#1d1d1f', theme: 'light'),
+
+  /// ── SIDEBAR ─────────────────────────────────────────────
+  Zone('sidebar',
+    bounds: Bounds(80, 50, 430, 895),
+    style: Style(bg: '#f2f2f4', borderRight: '1px solid #e0e0e2'),
+    children: [
+
+      /// Toolbar: sidebar toggle, presentation-mode, add (+).
+      Zone('sidebar-toolbar',
+        bounds: Bounds(80, 50, 430, 100),
+        style: Style(bg: '#f2f2f4', px: 16, py: 10),
+        children: [
+          IconButton('toggle-sidebar', icon: 'sidebar'),
+          IconButton('presentation-mode', icon: 'dashed-square'),
+          IconButton('add-tunnel', icon: '+'),
+        ],
+      ),
+
+      /// Tunnel list. Selected row MUST be blue #2563eb with white text.
+      Zone('tunnel-list',
+        bounds: Bounds(80, 100, 430, 810),
+        style: Style(bg: '#f2f2f4', px: 12, overflow: 'scroll-y'),
+        children: [
+
+          TunnelListItem(name: 'vps0', ports: ':8080 → 8080',
+            selected: false,
+            dot: StatusDot(colour: '#3a3a3c', size: 8),
+            style: Style(text: '#1d1d1f', rounded: 'lg', px: 12, py: 8)),
+
+          TunnelListItem(name: 'vps2', ports: ':8080 → 8080',
+            selected: false,
+            dot: StatusDot(colour: '#3a3a3c', size: 8),
+            style: Style(text: '#1d1d1f', rounded: 'lg', px: 12, py: 8)),
+
+          TunnelListItem(name: 'New Tunnel', ports: ':8080 → 8080',
+            selected: true,
+            dot: StatusDot(colour: tw.white, size: 8),
+            style: Style(bg: '#2563eb !important', text: tw.white,
+              rounded: 'lg', px: 12, py: 8)),
+        ],
+      ),
+
+      /// Row tools: reorder up/down, duplicate, delete.
+      Zone('list-tools',
+        bounds: Bounds(80, 810, 430, 855),
+        style: Style(bg: '#f2f2f4', borderTop: '1px solid #e0e0e2', px: 16),
+        children: [
+          Row(gap: 16, children: [
+            IconButton('move-up', icon: '↑'),
+            IconButton('move-down', icon: '↓'),
+            IconButton('duplicate', icon: 'copy'),
+            Spacer(),
+            IconButton('delete-tunnel', icon: 'trash'),
+          ]),
+        ],
+      ),
+
+      /// Footer: Preferences link + app version.
+      Zone('sidebar-footer',
+        bounds: Bounds(80, 855, 430, 895),
+        style: Style(bg: '#f2f2f4', px: 16, py: 8),
+        children: [
+          Row(justify: 'space-between', children: [
+            LinkButton(label: 'Preferences', icon: 'gear',
+              style: Style(text: '#1d1d1f', size: '12px')),
+            Label('v1.10.0',
+              style: Style(size: '12px', colour: '#8e8e93')),
+          ]),
+        ],
+      ),
+    ],
+  ),
+
+  /// ── DETAIL PANE ─────────────────────────────────────────
+  Zone('detail',
+    bounds: Bounds(430, 50, 1205, 895),
+    style: Style(bg: tw.white),
+    children: [
+
+      /// Header: window title + Save.
+      Zone('header',
+        bounds: Bounds(430, 50, 1205, 115),
+        style: Style(bg: '#f7f7f8', borderBottom: '1px solid #e0e0e2',
+          px: 24, py: 14),
+        children: [
+          Row(justify: 'space-between', children: [
+            Label('SSH Tunnel Manager',
+              style: Style(size: '17px', font: 'bold')),
+            Button(label: 'Save',
+              style: Style(bg: '#ebebed', text: '#8e8e93',
+                rounded: 'lg', px: 16, py: 6)),
+          ]),
+        ],
+      ),
+
+      /// Scrolling form area.
+      Zone('form',
+        bounds: Bounds(430, 115, 1205, 895),
+        style: Style(bg: tw.white, px: 32, py: 24, overflow: 'scroll-y'),
+        children: [
+
+          /// Status section: state row + Connect.
+          Label('Status', style: Style(font: 'bold', size: '16px', pb: 8)),
+          Zone('status-card',
+            style: Style(bg: '#fafafa', border: '1px solid #e5e5e7',
+              rounded: 'xl', p: 16),
+            children: [
+              Row(justify: 'space-between', children: [
+                StatusLabel(dot: StatusDot(colour: '#a1a1a6', size: 10),
+                  text: 'Disconnected',
+                  style: Style(text: '#6b6b70', size: '15px')),
+                Button(label: 'Connect',
+                  style: Style(bg: '#33c558 !important', text: tw.white,
+                    rounded: 'lg', px: 16, py: 6)),
+              ]),
+            ],
+          ),
+
+          /// Generated SSH command preview, monospace, with copy button.
+          Zone('ssh-command-card',
+            style: Style(bg: '#fafafa', border: '1px solid #e5e5e7',
+              rounded: 'xl', p: 16),
+            children: [
+              Row(crossAxis: 'center', children: [
+                Label('SSH', style: Style(size: '13px', colour: '#8e8e93')),
+                Spacer(),
+                IconButton('copy-command', icon: 'copy',
+                  style: Style(colour: '#8e8e93')),
+              ]),
+              CodeBlock(
+                text: 'ssh -N -L 127.0.0.1:8080:127.0.0.1:8080 -L '
+                    '127.0.0.1:8081:127.0.0.1:8081 -o RequestTTY=no '
+                    '-o RemoteCommand=none -o ControlMaster=no '
+                    '-o ControlPath=none -o ServerAliveInterval=30 '
+                    '-o ServerAliveCountMax=3 -o ConnectionAttempts=2 '
+                    '-o BatchMode=yes user@example.com',
+                style: Style(font: 'mono', size: '13px', colour: '#1d1d1f'),
+              ),
+            ],
+          ),
+
+          /// General section.
+          Label('General',
+            style: Style(font: 'bold', size: '16px', pt: 24, pb: 8)),
+          FormGroup(children: [
+            FormRow(label: 'Name', child: TextInput(value: 'New Tunnel',
+              align: 'right',
+              style: Style(bg: '#fafafa', border: '1px solid #e5e5e7',
+                rounded: 'lg', px: 12, py: 8))),
+          ]),
+
+          /// SSH Connection section.
+          Label('SSH Connection',
+            style: Style(font: 'bold', size: '16px', pt: 24, pb: 8)),
+          FormGroup(children: [
+
+            FormRow(label: 'Mode', child: SegmentedControl(
+              segments: ['Host', 'SSH Alias'],
+              selected: 0,
+              style: Style(bg: '#ebebed', text: '#1d1d1f',
+                selectedBg: tw.white, rounded: 'lg'))),
+
+            FormRow(label: 'Host', child: Row(gap: 8, children: [
+              TextInput(value: 'user@example.com',
+                style: Style(bg: '#fafafa', border: '1px solid #e5e5e7',
+                  rounded: 'lg', px: 12, py: 8, flex: Flex(1))),
+              Label(':',
+                style: Style(colour: '#8e8e93', align: 'center')),
+              TextInput(value: '22', width: 70,
+                style: Style(bg: '#fafafa', border: '1px solid #e5e5e7',
+                  rounded: 'lg', px: 12, py: 8)),
+            ])),
+
+            FormRow(label: 'Identity File (optional)',
+              child: TextInput(value: '',
+                style: Style(bg: '#fafafa', border: '1px solid #e5e5e7',
+                  rounded: 'lg', px: 12, py: 8, flex: Flex(1)))),
+          ]),
+        ],
+      ),
+    ],
+  ),
+)
