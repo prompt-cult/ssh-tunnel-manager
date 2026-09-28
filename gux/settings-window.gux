@@ -2,9 +2,9 @@ import 'gux:core';
 import 'gux:tw';
 import 'gux:controls';
 
-/// SSH Tunnel Manager — main settings window, light theme.
+/// SSH Tunnel Manager — main settings window (settings_ng), light theme.
 /// Left sidebar with tunnel list and list tools, right pane with
-/// status card, generated SSH command, and connection form.
+/// service-first hierarchy: Tunnel -> SSH Connection -> Port Forwarding -> Status.
 Page('settings-window',
   viewport: Viewport(1280, 975),
   style: Style(bg: tw.white, text: '#1d1d1f', theme: 'light'),
@@ -32,17 +32,17 @@ Page('settings-window',
         style: Style(bg: '#f2f2f4', px: 12, overflow: 'scroll-y'),
         children: [
 
-          TunnelListItem(name: 'vps0', ports: ':8080 → 8080',
+          TunnelListItem(name: 'vps0', ports: ':4096 → 4096',
             selected: false,
             dot: StatusDot(colour: '#3a3a3c', size: 8),
             style: Style(text: '#1d1d1f', rounded: 'lg', px: 12, py: 8)),
 
-          TunnelListItem(name: 'vps2', ports: ':8080 → 8080',
+          TunnelListItem(name: 'vps2', ports: ':4097 → 4096',
             selected: false,
             dot: StatusDot(colour: '#3a3a3c', size: 8),
             style: Style(text: '#1d1d1f', rounded: 'lg', px: 12, py: 8)),
 
-          TunnelListItem(name: 'New Tunnel', ports: ':8080 → 8080',
+          TunnelListItem(name: 'New Tunnel', ports: ':4098 → 4096',
             selected: true,
             dot: StatusDot(colour: tw.white, size: 8),
             style: Style(bg: '#2563eb !important', text: tw.white,
@@ -103,55 +103,15 @@ Page('settings-window',
         ],
       ),
 
-      /// Scrolling form area.
+      /// Scrolling form area: service-first layout.
       Zone('form',
         bounds: Bounds(430, 115, 1205, 895),
         style: Style(bg: tw.white, px: 32, py: 24, overflow: 'scroll-y'),
         children: [
 
-          /// Status section: state row + Connect.
-          Label('Status', style: Style(font: 'bold', size: '16px', pb: 8)),
-          Zone('status-card',
-            style: Style(bg: '#fafafa', border: '1px solid #e5e5e7',
-              rounded: 'xl', p: 16),
-            children: [
-              Row(justify: 'space-between', children: [
-                StatusLabel(dot: StatusDot(colour: '#a1a1a6', size: 10),
-                  text: 'Disconnected',
-                  style: Style(text: '#6b6b70', size: '15px')),
-                Button(label: 'Connect',
-                  style: Style(bg: '#33c558 !important', text: tw.white,
-                    rounded: 'lg', px: 16, py: 6)),
-              ]),
-            ],
-          ),
-
-          /// Generated SSH command preview, monospace, with copy button.
-          Zone('ssh-command-card',
-            style: Style(bg: '#fafafa', border: '1px solid #e5e5e7',
-              rounded: 'xl', p: 16),
-            children: [
-              Row(crossAxis: 'center', children: [
-                Label('SSH', style: Style(size: '13px', colour: '#8e8e93')),
-                Spacer(),
-                IconButton('copy-command', icon: 'copy',
-                  style: Style(colour: '#8e8e93')),
-              ]),
-              CodeBlock(
-                text: 'ssh -N -L 127.0.0.1:8080:127.0.0.1:8080 -L '
-                    '127.0.0.1:8081:127.0.0.1:8081 -o RequestTTY=no '
-                    '-o RemoteCommand=none -o ControlMaster=no '
-                    '-o ControlPath=none -o ServerAliveInterval=30 '
-                    '-o ServerAliveCountMax=3 -o ConnectionAttempts=2 '
-                    '-o BatchMode=yes user@example.com',
-                style: Style(font: 'mono', size: '13px', colour: '#1d1d1f'),
-              ),
-            ],
-          ),
-
-          /// General section.
-          Label('General',
-            style: Style(font: 'bold', size: '16px', pt: 24, pb: 8)),
+          /// 1. Tunnel section (formerly General).
+          Label('Tunnel',
+            style: Style(font: 'bold', size: '16px', pb: 8)),
           FormGroup(children: [
             FormRow(label: 'Name', child: TextInput(value: 'New Tunnel',
               align: 'right',
@@ -159,9 +119,9 @@ Page('settings-window',
                 rounded: 'lg', px: 12, py: 8))),
           ]),
 
-          /// SSH Connection section.
+          /// 2. SSH Connection section (Service definition).
           Label('SSH Connection',
-            style: Style(font: 'bold', size: '16px', pt: 24, pb: 8)),
+            style: Style(font: 'bold', size: '16px', pt: 20, pb: 8)),
           FormGroup(children: [
 
             FormRow(label: 'Mode', child: SegmentedControl(
@@ -186,6 +146,51 @@ Page('settings-window',
                 style: Style(bg: '#fafafa', border: '1px solid #e5e5e7',
                   rounded: 'lg', px: 12, py: 8, flex: Flex(1)))),
           ]),
+
+          /// 3. Port Forwarding section.
+          Label('Port Forwarding',
+            style: Style(font: 'bold', size: '16px', pt: 20, pb: 8)),
+          FormGroup(children: [
+            FormRow(label: 'Forward', child: TextInput(value: '4096 → 4096')),
+          ]),
+
+          /// 4. Status section: state row + Connect + SSH command.
+          Label('Status', style: Style(font: 'bold', size: '16px', pt: 20, pb: 8)),
+          Zone('status-card',
+            style: Style(bg: '#fafafa', border: '1px solid #e5e5e7',
+              rounded: 'xl', p: 16),
+            children: [
+              Row(justify: 'space-between', children: [
+                StatusLabel(dot: StatusDot(colour: '#a1a1a6', size: 10),
+                  text: 'Disconnected',
+                  style: Style(text: '#6b6b70', size: '15px')),
+                Button(label: 'Connect',
+                  style: Style(bg: '#33c558 !important', text: tw.white,
+                    rounded: 'lg', px: 16, py: 6)),
+              ]),
+            ],
+          ),
+
+          Zone('ssh-command-card',
+            style: Style(bg: '#fafafa', border: '1px solid #e5e5e7',
+              rounded: 'xl', p: 16),
+            children: [
+              Row(crossAxis: 'center', children: [
+                Label('SSH', style: Style(size: '13px', colour: '#8e8e93')),
+                Spacer(),
+                IconButton('copy-command', icon: 'copy',
+                  style: Style(colour: '#8e8e93')),
+              ]),
+              CodeBlock(
+                text: 'ssh -N -L 127.0.0.1:4096:127.0.0.1:4096 -o RequestTTY=no '
+                    '-o RemoteCommand=none -o ControlMaster=no '
+                    '-o ControlPath=none -o ServerAliveInterval=30 '
+                    '-o ServerAliveCountMax=3 -o ConnectionAttempts=2 '
+                    '-o BatchMode=yes user@example.com',
+                style: Style(font: 'mono', size: '13px', colour: '#1d1d1f'),
+              ),
+            ],
+          ),
         ],
       ),
     ],

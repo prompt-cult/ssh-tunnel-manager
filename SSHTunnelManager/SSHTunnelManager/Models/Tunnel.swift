@@ -21,9 +21,9 @@ struct PortMapping: Identifiable, Codable, Hashable {
         id: UUID = UUID(),
         forward: ForwardType = .local,
         localHost: String = "127.0.0.1",
-        localPort: Int = 8080,
+        localPort: Int = AppPreferences.defaultServicePort,
         remoteHost: String = "127.0.0.1",
-        remotePort: Int = 8080
+        remotePort: Int = AppPreferences.defaultServicePort
     ) {
         self.id = id
         self.forward = forward

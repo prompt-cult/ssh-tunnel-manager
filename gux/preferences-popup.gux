@@ -8,11 +8,7 @@ Page('preferences-popup',
   viewport: Viewport(1280, 921),
   style: Style(bg: tw.white, text: '#1d1d1f', theme: 'light'),
 
-  /// The underlying window content is the same as settings-window.gux.
-  /// Only the sidebar footer state and the popover differ; see
-  /// settings-window.gux for the full detail-pane contract.
-
-  /// ── SIDEBAR (summarised — identical contract to settings-window.gux) ──
+  /// ── SIDEBAR ─────────────────────────────────────────────
   Zone('sidebar',
     bounds: Bounds(180, 50, 500, 840),
     style: Style(bg: '#f2f2f4', borderRight: '1px solid #e0e0e2'),
@@ -25,7 +21,6 @@ Page('preferences-popup',
           dot: StatusDot(colour: '#3a3a3c', size: 8))),
 
       /// Footer: Preferences (popover anchor) + version.
-      /// Trash icon sits at the right edge just above the footer here.
       Zone('sidebar-footer',
         bounds: Bounds(180, 790, 500, 840),
         style: Style(bg: '#f2f2f4', px: 16, py: 8),
@@ -43,9 +38,9 @@ Page('preferences-popup',
 
   /// ── PREFERENCES POPOVER ─────────────────────────────────
   /// Anchored above the Preferences footer button, tail pointing down.
-  /// Light grey translucent macOS popover; NOT white.
+  /// Light grey translucent macOS popover with port frontier controls.
   Zone('preferences-popover',
-    bounds: Bounds(45, 555, 435, 775),
+    bounds: Bounds(45, 490, 475, 840),
     style: Style(bg: '#ececed !important', rounded: '2xl',
       shadow: 'lg', border: '1px solid #d6d6d8', p: 16),
     children: [
@@ -56,7 +51,7 @@ Page('preferences-popup',
       CheckboxRow(label: 'Launch at Login', checked: true,
         checkbox: Checkbox(state: 'checked', onColour: '#2563eb',
           tick: tw.white, size: 18),
-        style: Style(size: '14px', h: 44)),
+        style: Style(size: '14px', h: 36)),
 
       /// Divider between groups.
       Divider(style: Style(bg: '#c9c9cc', h: 1)),
@@ -66,18 +61,47 @@ Page('preferences-popup',
         checked: true,
         checkbox: Checkbox(state: 'checked', onColour: '#2563eb',
           tick: tw.white, size: 18),
-        style: Style(size: '14px', h: 44)),
+        style: Style(size: '14px', h: 36)),
 
       CheckboxRow(label: 'Show a notification on\nconnect / disconnect',
         checked: true,
         checkbox: Checkbox(state: 'checked', onColour: '#2563eb',
           tick: tw.white, size: 18),
-        style: Style(size: '14px', h: 56)),
+        style: Style(size: '14px', h: 48)),
+
+      /// Divider before port frontier.
+      Divider(style: Style(bg: '#c9c9cc', h: 1)),
+
+      /// Group 3: Port allocation frontier.
+      CheckboxRow(label: 'Find next high port',
+        checked: true,
+        checkbox: Checkbox(state: 'checked', onColour: '#2563eb',
+          tick: tw.white, size: 18),
+        style: Style(size: '14px', h: 36)),
+
+      FormRow(label: 'Default Service Port',
+        child: Row(gap: 8, children: [
+          TextInput(value: '4096', width: 75,
+            style: Style(bg: tw.white, border: '1px solid #d1d5db', rounded: 'md', px: 8, py: 4)),
+          IconButton('port-lock', icon: 'link',
+            style: Style(colour: '#2563eb', size: 16)),
+          TextInput(value: '4096', width: 75,
+            style: Style(bg: tw.white, border: '1px solid #d1d5db', rounded: 'md', px: 8, py: 4)),
+        ])),
+
+      /// Footer buttons: Cancel and Save.
+      Row(justify: 'space-between',
+        style: Style(pt: 12),
+        children: [
+          Button(label: 'Cancel',
+            style: Style(bg: '#e5e5ea', text: '#1d1d1f', rounded: 'md', px: 12, py: 6)),
+          Button(label: 'Save',
+            style: Style(bg: '#2563eb', text: tw.white, rounded: 'md', px: 14, py: 6)),
+        ]),
     ],
   ),
 
   /// ── DETAIL PANE (structural presence only) ──────────────
-  /// Full colour contract lives in settings-window.gux.
   Zone('detail',
     bounds: Bounds(500, 50, 1205, 840),
     style: Style(bg: tw.white),
@@ -87,15 +111,7 @@ Page('preferences-popup',
         Label('SSH Tunnel Manager'),
         Button(label: 'Save'),
       ]),
-      Zone('status-card', assert: Assert(non_blank: true), children: [
-        StatusLabel(text: 'Disconnected'),
-        Button(label: 'Connect',
-          style: Style(bg: '#33c558 !important', text: tw.white)),
-      ]),
-      Zone('ssh-command-card', assert: Assert(non_blank: true), children: [
-        CodeBlock(text: Dynamic('ssh-command'), font: 'mono'),
-      ]),
-      Label('General'),
+      Label('Tunnel'),
       FormRow(label: 'Name', child: TextInput(value: 'New Tunnel')),
       Label('SSH Connection'),
       FormRow(label: 'Mode', child: SegmentedControl(
@@ -104,6 +120,15 @@ Page('preferences-popup',
         child: TextInput(value: 'user@example.com')),
       FormRow(label: 'Identity File (optional)',
         child: TextInput(value: '')),
+      Label('Port Forwarding'),
+      Zone('status-card', assert: Assert(non_blank: true), children: [
+        StatusLabel(text: 'Disconnected'),
+        Button(label: 'Connect',
+          style: Style(bg: '#33c558 !important', text: tw.white)),
+      ]),
+      Zone('ssh-command-card', assert: Assert(non_blank: true), children: [
+        CodeBlock(text: Dynamic('ssh-command'), font: 'mono'),
+      ]),
     ],
   ),
 )

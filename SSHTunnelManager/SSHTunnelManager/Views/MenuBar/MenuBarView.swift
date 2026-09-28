@@ -47,6 +47,22 @@ struct MenuBarView: View {
             .buttonStyle(.plain)
 
             Button {
+                openWindow(id: "preferences")
+                NSApp.activate(ignoringOtherApps: true)
+            } label: {
+                HStack {
+                    Image(systemName: "checklist")
+                    Text("Preferences...")
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Button {
                 NSApplication.shared.terminate(nil)
             } label: {
                 HStack {
@@ -68,6 +84,12 @@ struct MenuBarView: View {
         .fixedSize(horizontal: true, vertical: false)
         // After the sizing modifiers, so the resizer sees the final footprint.
         .background(MenuBarWindowResizer())
+        .onAppear {
+            if !AppPreferences.hasCompletedFirstLaunch {
+                openWindow(id: "preferences")
+                NSApp.activate(ignoringOtherApps: true)
+            }
+        }
     }
 }
 

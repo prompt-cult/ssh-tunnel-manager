@@ -82,7 +82,9 @@ struct ContentView: View {
                     }
                     .buttonStyle(.borderless)
                     .popover(isPresented: $showPreferences, arrowEdge: .bottom) {
-                        AppPreferencesView()
+                        AppPreferencesView {
+                            showPreferences = false
+                        }
                     }
 
                     Spacer()
@@ -186,52 +188,13 @@ struct DividerDetailView: View {
     }
 }
 
-/// App-level preferences shown in a popover from the sidebar footer, so the
-/// always-visible UI stays a single button instead of a row of checkboxes.
+/// App-level preferences shown in a popover from the sidebar footer.
 @MainActor
 struct AppPreferencesView: View {
-    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
-    @State private var soundsEnabled = TunnelSound.isEnabled
-    @State private var notificationsEnabled = TunnelNotification.isEnabled
+    var onDismiss: (() -> Void)? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Preferences")
-                .font(.headline)
-
-            Toggle("Launch at Login", isOn: $launchAtLogin)
-                .onChange(of: launchAtLogin) { _, newValue in
-                    do {
-                        if newValue {
-                            try SMAppService.mainApp.register()
-                        } else {
-                            try SMAppService.mainApp.unregister()
-                        }
-                    } catch {
-                        logger.error("Failed to update login item: \(error.localizedDescription, privacy: .public)")
-                        launchAtLogin = !newValue
-                    }
-                }
-
-            Divider()
-
-            Toggle("Play a sound on connect / disconnect", isOn: $soundsEnabled)
-                .onChange(of: soundsEnabled) { _, newValue in
-                    TunnelSound.isEnabled = newValue
-                }
-
-            Toggle("Show a notification on connect / disconnect", isOn: $notificationsEnabled)
-                .onChange(of: notificationsEnabled) { _, newValue in
-                    TunnelNotification.isEnabled = newValue
-                    if newValue {
-                        // Request permission only when the user opts in, not at launch.
-                        TunnelNotification.requestAuthorizationIfNeeded()
-                    }
-                }
-        }
-        .toggleStyle(.checkbox)
-        .padding(16)
-        .frame(width: 300, alignment: .leading)
+        PreferencesWindowView(onDismiss: onDismiss)
     }
 }
 

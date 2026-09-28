@@ -33,12 +33,22 @@ struct SSHTunnelManagerApp: App {
                 .keyboardShortcut("n", modifiers: .command)
             }
         }
+
+        // Preferences Window
+        Window("Preferences", id: "preferences") {
+            PreferencesWindowView()
+                .frame(minWidth: 360, minHeight: 320)
+        }
+        .windowStyle(.automatic)
+        .windowResizability(.contentSize)
+        .defaultSize(width: 400, height: 350)
     }
 }
 
 @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNotificationCenterDelegate {
     let tunnelManager = TunnelManager()
+    private var controlSocketServer: ControlSocketServer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Make app accessory - no dock icon, proper focus handling
@@ -49,6 +59,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
         // Deliver connect/disconnect notifications as banners even while the app
         // is the active app (otherwise the system suppresses foreground alerts).
         UNUserNotificationCenter.current().delegate = self
+
+        // Start IPC control socket server
+        let server = ControlSocketServer(provider: tunnelManager)
+        server.start()
+        self.controlSocketServer = server
 
         // Register for additional termination signals
         setupSignalHandlers()
@@ -111,11 +126,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        controlSocketServer?.stop()
         tunnelManager.disconnectAll()
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         // Cleanup before termination is confirmed
+        controlSocketServer?.stop()
         tunnelManager.disconnectAll()
         return .terminateNow
     }
