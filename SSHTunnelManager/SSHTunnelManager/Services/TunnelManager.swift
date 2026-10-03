@@ -90,12 +90,7 @@ enum TunnelNotification {
 
 
 /// File to store active PIDs for cleanup on crash/force quit
-private let pidFileURL: URL = {
-    let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-    let appFolder = appSupport.appendingPathComponent("SSHTunnelManager", isDirectory: true)
-    try? FileManager.default.createDirectory(at: appFolder, withIntermediateDirectories: true)
-    return appFolder.appendingPathComponent("active_pids.txt")
-}()
+private let pidFileURL: URL = AppPaths.activePidsFile
 
 /// Process group ID for all SSH child processes (accessed from signal handlers, so must be global).
 /// Left as a plain global rather than `nonisolated(unsafe)` so it compiles on Swift 5.9 /
@@ -174,7 +169,7 @@ private func killProcessGroup() {
 
 @Observable
 @MainActor
-class TunnelManager {
+class TunnelManager: TunnelStateProvider {
     var items: [SidebarItem] = []
     var tunnels: [Tunnel] { items.tunnels }
     private var processIDs: [UUID: Int32] = [:]
@@ -775,12 +770,29 @@ class TunnelManager {
     // MARK: - Tunnel CRUD
 
     func addTunnel() {
+        let servicePort = AppPreferences.defaultServicePort
+        // Only locally bound ports (-L/-D) count as occupied; a remote forward's
+        // localPort is a dial-back target on this Mac, not a bound port here.
+        let allocated = PortAllocator.allocate(
+            servicePort: servicePort,
+            findNextHighPort: AppPreferences.findNextHighPort,
+            frontier: AppPreferences.maxAllocatedPort,
+            occupiedLocalPorts: Set(tunnels.flatMap { $0.locallyBoundPorts })
+        )
+        let initialMapping = PortMapping(
+            localPort: allocated?.localPort ?? servicePort,
+            remotePort: servicePort
+        )
         let newTunnel = Tunnel(
             name: "New Tunnel",
             host: "user@example.com",
-            port: 22
+            port: 22,
+            portMappings: [initialMapping]
         )
         items.append(.tunnel(newTunnel))
+        if let allocated {
+            AppPreferences.recordAllocatedPort(allocated.candidateFrontier)
+        }
         Task { await saveTunnels() }
     }
 
@@ -856,6 +868,43 @@ class TunnelManager {
         }
         Task { await saveTunnels() }
         return clone
+    }
+
+    // MARK: - Snapshots for IPC / MCP
+
+    func systemStatusSnapshot() -> SystemStatusSnapshot {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.10.0"
+        let activeCount = tunnels.filter { status(for: $0) == .connected }.count
+        return SystemStatusSnapshot(
+            version: version,
+            totalTunnels: tunnels.count,
+            activeTunnels: activeCount,
+            defaultServicePort: AppPreferences.defaultServicePort,
+            maxAllocatedPort: AppPreferences.maxAllocatedPort,
+            findNextHighPort: AppPreferences.findNextHighPort
+        )
+    }
+
+    func tunnelSnapshots() -> [TunnelSnapshot] {
+        tunnels.map { tunnel in
+            let st = status(for: tunnel)
+            let statusString: String
+            switch st {
+            case .disconnected: statusString = "disconnected"
+            case .connecting: statusString = "connecting"
+            case .connected: statusString = "connected"
+            }
+            return TunnelSnapshot(
+                id: tunnel.id.uuidString,
+                name: tunnel.name,
+                host: tunnel.host,
+                port: tunnel.port,
+                status: statusString,
+                portMappings: tunnel.portMappings.map(PortMappingSnapshot.init),
+                lastError: lastError(for: tunnel),
+                pid: processIDs[tunnel.id]
+            )
+        }
     }
 
     /// Disconnect all tunnels - called on app termination

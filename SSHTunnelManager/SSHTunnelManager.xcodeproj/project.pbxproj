@@ -19,9 +19,31 @@
 		A10009 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10009; };
 		A10010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10010; };
 		A10012 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B10012; };
+		A10020 /* AppPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10020; };
+		A10021 /* PreferencesDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10021; };
+		A10022 /* AppPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10022; };
+		A10023 /* PortAllocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023; };
+		A10024 /* TunnelStateSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10024; };
+		A10025 /* PreferencesWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10025; };
+		A10026 /* LineFramer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10026; };
+		A10027 /* ControlProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10027; };
+		A10028 /* ControlSocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10028; };
+		A30001 /* SSHTunnelManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30001; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		I10001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = H10001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F10001;
+			remoteInfo = SSHTunnelManager;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		B30001 /* SSHTunnelManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHTunnelManagerTests.swift; sourceTree = "<group>"; };
+		C30002 /* SSHTunnelManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SSHTunnelManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10001 /* SSHTunnelManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHTunnelManagerApp.swift; sourceTree = "<group>"; };
 		B10002 /* Tunnel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tunnel.swift; sourceTree = "<group>"; };
 		B10003 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
@@ -35,11 +57,27 @@
 		B10010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B10011 /* SSHTunnelManager.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SSHTunnelManager.entitlements; sourceTree = "<group>"; };
 		B10012 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		B10020 /* AppPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPreferences.swift; sourceTree = "<group>"; };
+		B10021 /* PreferencesDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesDraft.swift; sourceTree = "<group>"; };
+		B10022 /* AppPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPaths.swift; sourceTree = "<group>"; };
+		B10023 /* PortAllocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortAllocator.swift; sourceTree = "<group>"; };
+		B10024 /* TunnelStateSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunnelStateSnapshot.swift; sourceTree = "<group>"; };
+		B10025 /* PreferencesWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindowView.swift; sourceTree = "<group>"; };
+		B10026 /* LineFramer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineFramer.swift; sourceTree = "<group>"; };
+		B10027 /* ControlProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlProtocol.swift; sourceTree = "<group>"; };
+		B10028 /* ControlSocketServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlSocketServer.swift; sourceTree = "<group>"; };
 		C10001 /* SSHTunnelManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SSHTunnelManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		D10001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F10012 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -53,6 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				E10002 /* SSHTunnelManager */,
+				E10030 /* Tests */,
 				E10003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -76,14 +115,25 @@
 			isa = PBXGroup;
 			children = (
 				C10001 /* SSHTunnelManager.app */,
+				C30002 /* SSHTunnelManagerTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		E10030 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				B30001 /* SSHTunnelManagerTests.swift */,
+			);
+			path = Tests;
 			sourceTree = "<group>";
 		};
 		E10004 /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				B10002 /* Tunnel.swift */,
+				B10020 /* AppPreferences.swift */,
+				B10021 /* PreferencesDraft.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -93,8 +143,22 @@
 			children = (
 				B10003 /* ConfigStore.swift */,
 				B10004 /* TunnelManager.swift */,
+				B10022 /* AppPaths.swift */,
+				B10023 /* PortAllocator.swift */,
+				B10024 /* TunnelStateSnapshot.swift */,
+				E10020 /* IPC */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		E10020 /* IPC */ = {
+			isa = PBXGroup;
+			children = (
+				B10026 /* LineFramer.swift */,
+				B10027 /* ControlProtocol.swift */,
+				B10028 /* ControlSocketServer.swift */,
+			);
+			path = IPC;
 			sourceTree = "<group>";
 		};
 		E10006 /* Views */ = {
@@ -103,8 +167,17 @@
 				E10007 /* Components */,
 				E10008 /* MenuBar */,
 				E10010 /* MainWindow */,
+				E10021 /* Preferences */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		E10021 /* Preferences */ = {
+			isa = PBXGroup;
+			children = (
+				B10025 /* PreferencesWindowView.swift */,
+			);
+			path = Preferences;
 			sourceTree = "<group>";
 		};
 		E10007 /* Components */ = {
@@ -161,6 +234,24 @@
 			productReference = C10001 /* SSHTunnelManager.app */;
 			productType = "com.apple.product-type.application";
 		};
+		F10010 /* SSHTunnelManagerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = G10010 /* Build configuration list for PBXNativeTarget "SSHTunnelManagerTests" */;
+			buildPhases = (
+				F10011 /* Sources */,
+				F10012 /* Frameworks */,
+				F10013 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				I10002 /* PBXTargetDependency */,
+			);
+			name = SSHTunnelManagerTests;
+			productName = SSHTunnelManagerTests;
+			productReference = C30002 /* SSHTunnelManagerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -190,9 +281,18 @@
 			projectRoot = "";
 			targets = (
 				F10001 /* SSHTunnelManager */,
+				F10010 /* SSHTunnelManagerTests */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXTargetDependency section */
+		I10002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F10001 /* SSHTunnelManager */;
+			targetProxy = I10001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXResourcesBuildPhase section */
 		F10003 /* Resources */ = {
@@ -204,7 +304,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F10013 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F10011 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A30001 /* SSHTunnelManagerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		F10002 /* Sources */ = {
@@ -221,6 +339,15 @@
 				A10007 /* TunnelListView.swift in Sources */,
 				A10008 /* TunnelDetailView.swift in Sources */,
 				A10009 /* ContentView.swift in Sources */,
+				A10020 /* AppPreferences.swift in Sources */,
+				A10021 /* PreferencesDraft.swift in Sources */,
+				A10022 /* AppPaths.swift in Sources */,
+				A10023 /* PortAllocator.swift in Sources */,
+				A10024 /* TunnelStateSnapshot.swift in Sources */,
+				A10025 /* PreferencesWindowView.swift in Sources */,
+				A10026 /* LineFramer.swift in Sources */,
+				A10027 /* ControlProtocol.swift in Sources */,
+				A10028 /* ControlSocketServer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,6 +526,52 @@
 			};
 			name = Release;
 		};
+		G10008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.0fuz.SSHTunnelManagerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SSHTunnelManager.app/Contents/MacOS/SSHTunnelManager";
+			};
+			name = Debug;
+		};
+		G10009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.0fuz.SSHTunnelManagerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SSHTunnelManager.app/Contents/MacOS/SSHTunnelManager";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -416,6 +589,15 @@
 			buildConfigurations = (
 				G10005 /* Debug */,
 				G10006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		G10010 /* Build configuration list for PBXNativeTarget "SSHTunnelManagerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				G10008 /* Debug */,
+				G10009 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

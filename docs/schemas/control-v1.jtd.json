@@ -1,0 +1,75 @@
+{
+  "definitions": {
+    "ForwardType": {
+      "enum": ["local", "remote", "dynamic"]
+    },
+    "PortMapping": {
+      "properties": {
+        "id": { "type": "string" },
+        "forward": { "ref": "ForwardType" },
+        "localHost": { "type": "string" },
+        "localPort": { "type": "uint16" },
+        "remoteHost": { "type": "string" },
+        "remotePort": { "type": "uint16" }
+      }
+    },
+    "ConnectionStatus": {
+      "enum": ["disconnected", "connecting", "connected"]
+    },
+    "TunnelSnapshot": {
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "host": { "type": "string" },
+        "port": { "type": "uint16" },
+        "status": { "ref": "ConnectionStatus" },
+        "portMappings": {
+          "elements": { "ref": "PortMapping" }
+        }
+      },
+      "optionalProperties": {
+        "lastError": { "type": "string" },
+        "pid": { "type": "int32" }
+      }
+    },
+    "SystemStatus": {
+      "properties": {
+        "version": { "type": "string" },
+        "totalTunnels": { "type": "uint32" },
+        "activeTunnels": { "type": "uint32" },
+        "defaultServicePort": { "type": "uint16" },
+        "maxAllocatedPort": { "type": "uint16" },
+        "findNextHighPort": { "type": "boolean" }
+      }
+    },
+    "RpcError": {
+      "properties": {
+        "code": { "type": "int32" },
+        "message": { "type": "string" }
+      }
+    },
+    "Request": {
+      "properties": {
+        "id": { "type": "string" },
+        "method": { "type": "string" }
+      },
+      "optionalProperties": {
+        "params": {
+          "values": {}
+        }
+      }
+    },
+    "Response": {
+      "properties": {
+        "id": { "type": "string" }
+      },
+      "optionalProperties": {
+        "result": {
+          "values": {}
+        },
+        "error": { "ref": "RpcError" }
+      }
+    }
+  },
+  "ref": "Response"
+}

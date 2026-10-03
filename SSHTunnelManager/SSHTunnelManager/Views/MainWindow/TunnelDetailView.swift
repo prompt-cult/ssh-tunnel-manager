@@ -82,104 +82,13 @@ struct TunnelDetailView: View {
     var body: some View {
         Form {
             Section {
-                HStack {
-                    StatusIndicator(status: status, isFailed: lastError != nil)
-                    Text(lastError != nil ? "Failed" : statusText)
-                        .foregroundStyle(lastError != nil ? .red : statusColor)
-
-                    Spacer()
-
-                    Button(status != .disconnected ? "Disconnect" : "Connect") {
-                        if hasChanges {
-                            saveChanges()
-                        }
-                        tunnelManager.toggle(tunnel: editedTunnel)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(status != .disconnected ? .red : .green)
-                }
-
-                if let lastError {
-                    Label(lastError, systemImage: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.red)
-                        .font(.callout)
-                        .textSelection(.enabled)
-                }
-
-                UsageRow(label: "SSH", value: sshCommand(for: editedTunnel))
-            } header: {
-                Text("Status")
-            }
-
-            // Right below Status, not at the bottom of the form — these are the
-            // rows people actually come back for once a tunnel is set up, and
-            // they shouldn't require scrolling past the whole editor.
-            if status == .connected {
-                Section {
-                    ForEach(editedTunnel.portMappings) { mapping in
-                        switch mapping.forward {
-                        case .dynamic:
-                            UsageRow(label: "Proxy", value: "\(mapping.localHost):\(mapping.localPort)")
-                            UsageRow(label: "socks5h", value: "socks5h://\(mapping.localHost):\(mapping.localPort)")
-                            UsageRow(label: "socks5", value: "socks5://\(mapping.localHost):\(mapping.localPort)")
-                            // System-level proxy stays a pair of short, glanceable
-                            // terminal commands the user can audit before running —
-                            // the app itself never touches system settings, so a
-                            // crash or dropped tunnel can't strand the system
-                            // behind a dead proxy (issue #20). The service name is
-                            // detected read-only by the app, see activeNetworkService.
-                            let svc = activeNetworkService ?? "Wi-Fi"
-                            UsageRow(
-                                label: "Sys on",
-                                value: "networksetup -setsocksfirewallproxy \"\(svc)\" \(mapping.localHost) \(mapping.localPort) && networksetup -setsocksfirewallproxystate \"\(svc)\" on"
-                            )
-                            UsageRow(
-                                label: "Sys off",
-                                value: "networksetup -setsocksfirewallproxystate \"\(svc)\" off"
-                            )
-                            Text("Sys on routes all of this Mac's traffic through the proxy (\(svc) is your current network service); Sys off restores it. Run them in a terminal; needs an admin account. Sys off stays shown here while the tunnel is down.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        case .remote:
-                            UsageRow(
-                                label: "R :\(mapping.remotePort)",
-                                value: "server listens on \(mapping.remoteHost):\(mapping.remotePort) → \(mapping.localHost):\(mapping.localPort) here"
-                            )
-                        case .local:
-                            UsageRow(
-                                label: ":\(mapping.localPort)",
-                                value: "http://\(mapping.localHost):\(mapping.localPort)"
-                            )
-                        }
-                    }
-                } header: {
-                    Text("Usage")
-                }
-            } else if editedTunnel.portMappings.contains(where: { $0.forward == .dynamic }) {
-                // Keep the Sys off line visible while the tunnel is down — it's
-                // needed most right after a dead SOCKS tunnel left the system
-                // behind an unreachable proxy, which is exactly when the
-                // connected-only Usage section above disappears.
-                Section {
-                    let svc = activeNetworkService ?? "Wi-Fi"
-                    UsageRow(
-                        label: "Sys off",
-                        value: "networksetup -setsocksfirewallproxystate \"\(svc)\" off"
-                    )
-                    Text("If you enabled the system-level SOCKS proxy while the tunnel was up, this restores direct internet access.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } header: {
-                    Text("Usage")
-                }
-            }
-
-            Section {
                 TextField("Name", text: $editedTunnel.name)
                     .textFieldStyle(.roundedBorder)
                     .focused($focusedField, equals: .name)
+
+                Toggle("Auto-connect on launch", isOn: $editedTunnel.autoConnect)
             } header: {
-                Text("General")
+                Text("Tunnel")
             }
 
             Section {
@@ -307,7 +216,7 @@ struct TunnelDetailView: View {
                 Button {
                     editedTunnel.portMappings.append(PortMapping(
                         localPort: nextLocalPort(),
-                        remotePort: nextLocalPort()
+                        remotePort: AppPreferences.defaultServicePort
                     ))
                 } label: {
                     Label("Add Port Mapping", systemImage: "plus")
@@ -328,9 +237,84 @@ struct TunnelDetailView: View {
             }
 
             Section {
-                Toggle("Auto-connect on launch", isOn: $editedTunnel.autoConnect)
+                HStack {
+                    StatusIndicator(status: status, isFailed: lastError != nil)
+                    Text(lastError != nil ? "Failed" : statusText)
+                        .foregroundStyle(lastError != nil ? .red : statusColor)
+
+                    Spacer()
+
+                    Button(status != .disconnected ? "Disconnect" : "Connect") {
+                        if hasChanges {
+                            saveChanges()
+                        }
+                        tunnelManager.toggle(tunnel: editedTunnel)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(status != .disconnected ? .red : .green)
+                }
+
+                if let lastError {
+                    Label(lastError, systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                        .font(.callout)
+                        .textSelection(.enabled)
+                }
+
+                UsageRow(label: "SSH", value: sshCommand(for: editedTunnel))
             } header: {
-                Text("Options")
+                Text("Status")
+            }
+
+            // Usage rows for connected tunnels
+            if status == .connected {
+                Section {
+                    ForEach(editedTunnel.portMappings) { mapping in
+                        switch mapping.forward {
+                        case .dynamic:
+                            UsageRow(label: "Proxy", value: "\(mapping.localHost):\(mapping.localPort)")
+                            UsageRow(label: "socks5h", value: "socks5h://\(mapping.localHost):\(mapping.localPort)")
+                            UsageRow(label: "socks5", value: "socks5://\(mapping.localHost):\(mapping.localPort)")
+                            let svc = activeNetworkService ?? "Wi-Fi"
+                            UsageRow(
+                                label: "Sys on",
+                                value: "networksetup -setsocksfirewallproxy \"\(svc)\" \(mapping.localHost) \(mapping.localPort) && networksetup -setsocksfirewallproxystate \"\(svc)\" on"
+                            )
+                            UsageRow(
+                                label: "Sys off",
+                                value: "networksetup -setsocksfirewallproxystate \"\(svc)\" off"
+                            )
+                            Text("Sys on routes all of this Mac's traffic through the proxy (\(svc) is your current network service); Sys off restores it. Run them in a terminal; needs an admin account. Sys off stays shown here while the tunnel is down.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        case .remote:
+                            UsageRow(
+                                label: "R :\(mapping.remotePort)",
+                                value: "server listens on \(mapping.remoteHost):\(mapping.remotePort) → \(mapping.localHost):\(mapping.localPort) here"
+                            )
+                        case .local:
+                            UsageRow(
+                                label: ":\(mapping.localPort)",
+                                value: "http://\(mapping.localHost):\(mapping.localPort)"
+                            )
+                        }
+                    }
+                } header: {
+                    Text("Usage")
+                }
+            } else if editedTunnel.portMappings.contains(where: { $0.forward == .dynamic }) {
+                Section {
+                    let svc = activeNetworkService ?? "Wi-Fi"
+                    UsageRow(
+                        label: "Sys off",
+                        value: "networksetup -setsocksfirewallproxystate \"\(svc)\" off"
+                    )
+                    Text("If you enabled the system-level SOCKS proxy while the tunnel was up, this restores direct internet access.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } header: {
+                    Text("Usage")
+                }
             }
 
             Section {
@@ -519,15 +503,27 @@ struct TunnelDetailView: View {
     }
 
     private func nextLocalPort() -> Int {
-        let usedPorts = Set(editedTunnel.portMappings.map(\.localPort))
-        var port = (editedTunnel.portMappings.map(\.localPort).max() ?? 8079) + 1
-        while usedPorts.contains(port) {
-            port += 1
-        }
-        return port
+        // Only locally bound ports (-L/-D) occupy local ports; a remote
+        // forward's localPort is a dial-back target, not a bind on this Mac.
+        let occupied = Set(
+            tunnelManager.tunnels.flatMap { $0.locallyBoundPorts }
+                + editedTunnel.locallyBoundPorts
+        )
+        let result = PortAllocator.allocate(
+            servicePort: AppPreferences.defaultServicePort,
+            findNextHighPort: AppPreferences.findNextHighPort,
+            frontier: AppPreferences.maxAllocatedPort,
+            occupiedLocalPorts: occupied
+        )
+        return result?.localPort ?? AppPreferences.defaultServicePort
     }
 
     private func saveChanges() {
+        // Record only ports this Mac actually binds (-L/-D). A remote forward's
+        // localPort is a dial-back target and must not advance the frontier.
+        for port in editedTunnel.locallyBoundPorts {
+            AppPreferences.recordAllocatedPort(port)
+        }
         tunnelManager.updateTunnel(editedTunnel)
     }
 

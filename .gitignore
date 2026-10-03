@@ -22,3 +22,6 @@ dist/
 
 # JetBrains
 .idea/
+
+# Repo-local scratch space
+.tmp/

@@ -1,0 +1,68 @@
+import 'gux:core';
+import 'gux:tw';
+import 'gux:controls';
+
+/// SSH Tunnel Manager — macOS menu bar popover, dark theme.
+/// Lists tunnels with quick connect toggles plus Settings/Preferences/Quit actions.
+Page('menu-bar-popover',
+  viewport: Viewport(594, 390),
+  style: Style(bg: '#2b2b2d', text: tw.white, theme: 'dark'),
+
+  /// ── TUNNEL LIST ─────────────────────────────────────────
+  Zone('tunnel-list',
+    bounds: Bounds(8, 0, 586, 156),
+    style: Style(bg: '#2b2b2d', px: 12),
+    children: [
+
+      /// Row 1 — vps0, toggle ON (blue track, knob right).
+      TunnelRow(
+        dot: StatusDot(colour: tw.white, size: 8),
+        name: 'vps0',
+        portLabel: ':4096',
+        toggle: ToggleSwitch(state: 'on',
+          onColour: '#3b82f6', offColour: '#6b6b6e', knob: tw.white),
+        style: Style(bg: '#2b2b2d', text: tw.white, size: '14px', h: 46),
+      ),
+
+      /// Row 2 — vps2, toggle OFF.
+      TunnelRow(
+        dot: StatusDot(colour: tw.white, size: 8),
+        name: 'vps2',
+        portLabel: ':4096',
+        toggle: ToggleSwitch(state: 'off',
+          onColour: '#3b82f6', offColour: '#6b6b6e', knob: tw.white),
+        style: Style(bg: '#2b2b2d', text: tw.white, size: '14px', h: 46),
+      ),
+
+      /// Row 3 — New Tunnel, toggle OFF.
+      TunnelRow(
+        dot: StatusDot(colour: tw.white, size: 8),
+        name: 'New Tunnel',
+        portLabel: ':4096',
+        toggle: ToggleSwitch(state: 'off',
+          onColour: '#3b82f6', offColour: '#6b6b6e', knob: tw.white),
+        style: Style(bg: '#2b2b2d', text: tw.white, size: '14px', h: 46),
+      ),
+    ],
+  ),
+
+  /// ── ACTION ROWS ─────────────────────────────────────────
+  /// Separated from the tunnel list by a hairline divider.
+  Zone('actions',
+    bounds: Bounds(8, 156, 586, 390),
+    style: Style(bg: '#2b2b2d', borderTop: '1px solid #4a4a4d', px: 12),
+    children: [
+
+      ActionRow(icon: 'gear', label: 'Settings…',
+        shortcut: '⌘,',
+        style: Style(text: tw.white, size: '14px', h: 52)),
+
+      ActionRow(icon: 'checklist', label: 'Preferences…',
+        style: Style(text: tw.white, size: '14px', h: 52)),
+
+      ActionRow(icon: 'power', label: 'Quit',
+        shortcut: '⌘Q',
+        style: Style(text: tw.white, size: '14px', h: 52)),
+    ],
+  ),
+)

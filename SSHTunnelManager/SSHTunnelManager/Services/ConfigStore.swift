@@ -10,13 +10,7 @@ actor ConfigStore {
     private let fileURL: URL
 
     init() {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let appFolder = appSupport.appendingPathComponent("SSHTunnelManager", isDirectory: true)
-
-        // Create directory if needed
-        try? FileManager.default.createDirectory(at: appFolder, withIntermediateDirectories: true)
-
-        self.fileURL = appFolder.appendingPathComponent("tunnels.json")
+        self.fileURL = AppPaths.tunnelsConfigFile
     }
 
     func load() -> [SidebarItem] {
